@@ -15,10 +15,10 @@ spec:
       labels:
         app: fastapi-demo
     spec:
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+      # securityContext:
+      #   runAsUser: 1000
+      #   runAsGroup: 1000
+      #   fsGroup: 1000
       volumes:
         - name: nfs-volume
           persistentVolumeClaim:
@@ -28,10 +28,10 @@ spec:
           image: nuu9323226/fastapi-demo:latest
           ports:
             - containerPort: 8000
-          securityContext:
-            allowPrivilegeEscalation: false
-            seccompProfile:
-              type: RuntimeDefault
+          # securityContext:
+          #   allowPrivilegeEscalation: false
+          #   seccompProfile:
+          #     type: RuntimeDefault
           volumeMounts:
             - mountPath: /mnt/nfs
               name: nfs-volume

@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 調整權限
-RUN chown -R appuser:appuser /app
+#RUN chown -R appuser:appuser /app
 
 USER appuser
 
