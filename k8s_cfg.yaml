@@ -1,3 +1,22 @@
+# ----------------------------------------------------------------------
+# Kubernetes 配置文件總結
+# ----------------------------------------------------------------------
+# 此文件包含一個完整的 FastAPI 應用部署設定，包括:
+# 1. Deployment: 部署 FastAPI 容器 (映像檔 nuu9323226/fastapi-demo:0523)
+#    - 使用 NFS 持久化存儲 (/app/nfs)
+#    - 資源限制: CPU 500m, 記憶體 256Mi
+# 2. Service: NodePort 類型，將容器端口 8000 暴露為服務端口 80
+# 3. Ingress: 配置 URL 路徑 /ai/fastapi-demo/
+#    - 使用 nginx ingress controller
+#    - 路徑重寫 (rewrite-target): 
+#      * 設定 nginx.ingress.kubernetes.io/rewrite-target: /$1,將 rewrite-target 從 / 改為 /$1，這樣可以保留路徑中的重要部分。
+#      * 配合 path: /ai/fastapi-demo/(.*)，使用正則表達式捕獲括號內的內容 
+#      * 例如：/ai/fastapi-demo/docs 會重寫為 /docs
+#      * 如此保留路徑後段，使 FastAPI 的 Swagger UI (/docs) 能正確顯示
+#      * pathType 必須設為 ImplementationSpecific 才能支援正則表達式
+# 4. PVC: 持久卷聲明，使用 nfs-csi 存儲類別申請 1Gi 空間
+# ----------------------------------------------------------------------
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,7 +40,7 @@ spec:
             claimName: fast-nfs
       containers:
         - name: fastapi
-          image: nuu9323226/fastapi-demo:0522
+          image: nuu9323226/fastapi-demo:0523
           ports:
             - containerPort: 8000
           volumeMounts:
@@ -56,8 +75,7 @@ metadata:
   name: fastapi-demo
   namespace: dev
   annotations:
-#    nginx.ingress.kubernetes.io/rewrite-target: /
-#當設ssl-redirect為 "false" 時，允許使用 HTTP 訪問服務，不會強制重定向到 HTTPS
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
 spec:
@@ -65,8 +83,8 @@ spec:
   rules:
     - http:
         paths:
-          - path: /ai/fastapi-demo
-            pathType: Prefix
+          - path: /ai/fastapi-demo/(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: fastapi-demo
