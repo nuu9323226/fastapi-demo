@@ -14,6 +14,7 @@
 #      * 例如：/ai/fastapi-demo/docs 會重寫為 /docs
 #      * 如此保留路徑後段，使 FastAPI 的 Swagger UI (/docs) 能正確顯示
 #      * pathType 必須設為 ImplementationSpecific 才能支援正則表達式
+#      這樣修改後，當訪問 /ai/fastapi-demo/docs 時，請求會被正確地轉發到 FastAPI 服務的 /docs 路徑，從而顯示 Swagger UI。
 # 4. PVC: 持久卷聲明，使用 nfs-csi 存儲類別申請 1Gi 空間
 # ----------------------------------------------------------------------
 
