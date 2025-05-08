@@ -35,15 +35,32 @@ spec:
       labels:
         app: fastapi-demo
     spec:
+      # securityContext:
+      #   fsGroup: 1000  # 設置卷的群組為 1000
       volumes:
         - name: nfs-volume
           persistentVolumeClaim:
             claimName: fast-nfs
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /app/nfs"]
+          securityContext:
+            runAsUser: 0  # 以 root 身份運行
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /app/nfs
+              name: nfs-volume      
       containers:
         - name: fastapi
-          image: nuu9323226/fastapi-demo:0523
+          image: nuu9323226/fastapi-demo:0527
           ports:
             - containerPort: 8000
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
           volumeMounts:
             - mountPath: /app/nfs
               name: nfs-volume
